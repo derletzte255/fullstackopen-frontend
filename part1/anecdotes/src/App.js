@@ -17,8 +17,10 @@ const App = () => {
 	]
 
 	const selectRandomAnecdote = () => {
-		const len = anecdotes.length
-		const roll = random(len)
+		let roll = selected
+		while (roll === selected) {
+			roll = random(anecdotes.length)
+		}
 		setSelected(roll)
 	}
 
