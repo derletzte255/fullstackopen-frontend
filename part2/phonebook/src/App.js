@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
+import Notification from './components/Notification'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
@@ -11,6 +12,8 @@ const App = () => {
 	const [newNumber, setNewNumber] = useState('')
 	const [query, setQuery] = useState('')
 	const [personsToShow, setPersonsToShow] = useState([])
+	const [message, setMessage] = useState('')
+	const [isSuccess, setIsSuccess] = useState(true)
 
 	useEffect(() => {
 		personService.getAll().then((initialPersons) => {
@@ -69,7 +72,7 @@ const App = () => {
 	}
 
 	const updatePerson = () => {
-		const person = persons.find((person) => person.name == newName)
+		const person = persons.find((person) => person.name === newName)
 		const personWithChangedNumber = { ...person, number: newNumber }
 		const id = personWithChangedNumber.id
 
@@ -82,7 +85,13 @@ const App = () => {
 				resetInputs()
 			})
 			.catch((err) => {
-				alert(`the person '${person.name}' was already deleted from server`)
+				setIsSuccess(false)
+				setMessage(
+					`the person '${person.name}' was already deleted from server`
+				)
+				setTimeout(() => {
+					setMessage('')
+				}, 5000)
 			})
 	}
 
@@ -95,19 +104,31 @@ const App = () => {
 			console.log(returnedPerson)
 			setPersons(persons.concat(returnedPerson))
 			resetInputs()
+
+			setIsSuccess(true)
+			setMessage(`Added ${returnedPerson.name}`)
+			setTimeout(() => {
+				setMessage('')
+			}, 5000)
 		})
 	}
 
 	const deletePerson = (id) => {
-		personService.remove(id).then(() => {
-			setPersons(persons.filter((person) => person.id !== id))
-		})
+		personService
+			.remove(id)
+			.then(() => {
+				setPersons(persons.filter((person) => person.id !== id))
+			})
+			.catch((err) => {
+				alert('the person was already deleted from server')
+			})
 	}
 
 	return (
 		<div>
 			<h2>Phonebook</h2>
 			<Filter query={query} handleQueryChange={handleQueryChange} />
+			<Notification message={message} isSuccess={isSuccess} />
 
 			<h3>add a new</h3>
 			<PersonForm
