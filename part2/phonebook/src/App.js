@@ -12,8 +12,7 @@ const App = () => {
 	const [newNumber, setNewNumber] = useState('')
 	const [query, setQuery] = useState('')
 	const [personsToShow, setPersonsToShow] = useState([])
-	const [message, setMessage] = useState('')
-	const [isSuccess, setIsSuccess] = useState(true)
+	const [notification, setNotification] = useState(null)
 
 	useEffect(() => {
 		personService.getAll().then((initialPersons) => {
@@ -31,6 +30,13 @@ const App = () => {
 			})
 		)
 	}, [query, persons])
+
+	const notify = (message, type = 'info') => {
+		setNotification({ message, type })
+		setTimeout(() => {
+			setNotification(null)
+		}, 5000)
+	}
 
 	const handleNameChange = (e) => {
 		setNewName(e.target.value)
@@ -85,13 +91,10 @@ const App = () => {
 				resetInputs()
 			})
 			.catch((err) => {
-				setIsSuccess(false)
-				setMessage(
-					`the person '${person.name}' was already deleted from server`
+				notify(
+					`the person '${person.name}' was already deleted from server`,
+					'alert'
 				)
-				setTimeout(() => {
-					setMessage('')
-				}, 5000)
 			})
 	}
 
@@ -105,11 +108,7 @@ const App = () => {
 			setPersons(persons.concat(returnedPerson))
 			resetInputs()
 
-			setIsSuccess(true)
-			setMessage(`Added ${returnedPerson.name}`)
-			setTimeout(() => {
-				setMessage('')
-			}, 5000)
+			notify(`Added ${returnedPerson.name}`)
 		})
 	}
 
