@@ -91,25 +91,25 @@ const App = () => {
 				resetInputs()
 			})
 			.catch((err) => {
-				notify(
-					`the person '${person.name}' was already deleted from server`,
-					'alert'
-				)
+				notify(err.response.data.error, 'alert')
 			})
 	}
 
 	const addPerson = () => {
-		const id = persons.length + 1
+		const newPerson = { name: newName, number: newNumber }
 
-		const newPerson = { name: newName, number: newNumber, id }
+		personService
+			.create(newPerson)
+			.then((returnedPerson) => {
+				console.log(returnedPerson)
+				setPersons(persons.concat(returnedPerson))
+				resetInputs()
 
-		personService.create(newPerson).then((returnedPerson) => {
-			console.log(returnedPerson)
-			setPersons(persons.concat(returnedPerson))
-			resetInputs()
-
-			notify(`Added ${returnedPerson.name}`)
-		})
+				notify(`Added ${returnedPerson.name}`)
+			})
+			.catch((err) => {
+				notify(err.response.data.error, 'alert')
+			})
 	}
 
 	const deletePerson = (id) => {
@@ -127,7 +127,7 @@ const App = () => {
 		<div>
 			<h2>Phonebook</h2>
 			<Filter query={query} handleQueryChange={handleQueryChange} />
-			<Notification message={message} isSuccess={isSuccess} />
+			<Notification notification={notification} />
 
 			<h3>add a new</h3>
 			<PersonForm
